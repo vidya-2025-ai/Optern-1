@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optern EduWorks – Bridging Students with Real Opportunities</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Inter and Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <script>
+        // AngularJS application module and controller
+        angular.module('opternApp', [])
+            .controller('LandingPageController', function($scope, $element, $window) {
+                $scope.currentYear = new Date().getFullYear();
+                $scope.isHeaderVisible = true; // Initial state: header is visible
+                let lastScrollY = 0; // To track previous scroll position
+                const scrollThreshold = 50; // Pixels to scroll before hiding/showing
+
+                // Function to handle scroll event for header visibility
+                angular.element($window).on('scroll', function() {
+                    const currentScrollY = $window.pageYOffset;
+
+                    // Only react if scrolled past a certain point and not at the very top
+                    if (currentScrollY > scrollThreshold) {
+                        if (currentScrollY > lastScrollY && $scope.isHeaderVisible) {
+                            // Scrolling down and header is visible, hide it
+                            $scope.$apply(() => {
+                                $scope.isHeaderVisible = false;
+                            });
+                        } else if (currentScrollY < lastScrollY && !$scope.isHeaderVisible) {
+                            // Scrolling up and header is hidden, show it
+                            $scope.$apply(() => {
+                                $scope.isHeaderVisible = true;
+                            });
+                        }
+                    } else if (currentScrollY <= scrollThreshold && !$scope.isHeaderVisible) {
+                        // At or near the very top, always show header
+                        $scope.$apply(() => {
+                            $scope.isHeaderVisible = true;
+                        });
+                    }
+                    lastScrollY = currentScrollY; // Update last scroll position
+                });
+
+                // Intersection Observer for continuous scroll animations
+                const observerOptions = {
+                    root: null, // Use the viewport as the root
+                    rootMargin: '0px',
+                    threshold: 0 // Trigger as soon as any part of element enters/leaves
+                };
+
+                const observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        $scope.$apply(() => { // Use $apply to update scope within AngularJS digest cycle
+                            if (entry.isIntersecting) {
+                                // Element is entering or fully visible
+                                angular.element(entry.target).addClass('is-visible');
+                            } else {
+                                // Element is leaving the viewport
+                                angular.element(entry.target).removeClass('is-visible');
+                            }
+                        });
+                    });
+                }, observerOptions);
+
+                // Observe elements with the 'fade-in-on-scroll' class on window load
+                angular.element($window).on('load', function() {
+                    const elementsToAnimate = $element[0].querySelectorAll('.fade-in-on-scroll');
+                    elementsToAnimate.forEach(el => {
+                        // Initially set elements to hidden state
+                        angular.element(el).removeClass('is-visible');
+                        observer.observe(el);
+                    });
+                });
+            });
+    </script>
+
+    <style>
+        /* Custom CSS for color palette and animations based on Optern's branding */
+        .font-inter {
+          font-family: 'Inter', sans-serif;
+        }
+        .font-poppins {
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .text-navy-800 {
+          color: #002B5B; /* Navy */
+        }
+        .bg-navy-800 {
+          background-color: #002B5B; /* Navy */
+        }
+        .text-sky-500 {
+          color: #00A8E8; /* Sky Blue */
+        }
+        .bg-sky-500 {
+          background-color: #00A8E8; /* Sky Blue */
+        }
+        .hover\:bg-sky-600:hover {
+          background-color: #008CC7; /* Slightly darker Sky Blue for hover */
+        }
+        .border-sky-500 {
+          border-color: #00A8E8;
+        }
+        .text-yellow-600 {
+          color: #F1C40F; /* Yellow */
+        }
+        .bg-yellow-50 {
+          background-color: #FFFBEB; /* Light yellow background */
+        }
+        .border-yellow-600 {
+          border-color: #F1C40F;
+        }
+        .bg-blue-50 {
+          background-color: #ECF8FF; /* Light blue background */
+        }
+        .border-blue-800 {
+          border-color: #002B5B;
+        }
+        .bg-yellow-100 { /* New color for workflow steps */
+            background-color: #FEFCE8;
+        }
+        .bg-yellow-600 { /* New color for workflow numbers */
+            background-color: #D97706;
+        }
+
+
+        /* Keyframe animations - these are not directly used by IntersectionObserver toggling classes */
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Initial state for elements to be animated on scroll */
+        .fade-in-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out; /* Smooth transition */
+        }
+        .fade-in-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Header scroll effect */
+        .header-hidden {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .header-visible {
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+
+        /* Custom styles for workflow lines */
+        .workflow-container {
+            display: flex;
+            flex-direction: column; /* Default to column for mobile */
+            justify-content: center;
+            align-items: center; /* Center items for mobile */
+            position: relative;
+        }
+
+        .workflow-step {
+            position: relative;
+            flex-shrink: 0; /* Prevent shrinking */
+            width: 100%; /* Full width on mobile */
+            max-width: 200px; /* Limit individual card width */
+            text-align: center;
+            padding: 1rem; /* Adjusted padding */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        /* Desktop / Tablet styles for horizontal flow */
+        @media (min-width: 768px) {
+            .workflow-container {
+                flex-direction: row; /* Row for desktop */
+                align-items: flex-start; /* Align items to start for consistent top alignment */
+                gap: 3rem; /* Increased gap for visual separation and arrow space */
+            }
+            .workflow-step {
+                width: auto; /* Let content determine width, but respect max-width */
+                flex: 1; /* Allow steps to grow/shrink equally */
+            }
+            .workflow-step:not(:last-child)::after {
+                content: ''; /* Remove content property */
+                position: absolute;
+                top: 50%;
+                right: -2.5rem; /* Half of gap */
+                width: 3rem; /* Length of the line connecting steps */
+                height: 2px;
+                background-color: #D1D5DB;
+                transform: translateY(-50%);
+                /* SVG arrow for horizontal flow */
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right center;
+                background-size: 2rem; /* Increased arrow size */
+                z-index: -1; /* Ensure line is behind content */
+            }
+            .workflow-step:last-child::after {
+                content: none; /* No line after the last step */
+            }
+        }
+
+        /* Mobile specific styles for vertical flow */
+        @media (max-width: 767px) {
+            .workflow-step:not(:last-child)::after {
+                content: ''; /* Remove content property */
+                position: absolute;
+                bottom: -2.5rem; /* Half of gap */
+                left: 50%;
+                width: 2px;
+                height: 3rem; /* Length of the line connecting steps */
+                background-color: #D1D5DB;
+                transform: translateX(-50%);
+                /* SVG arrow for vertical flow */
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23D1D5DB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: center bottom;
+                background-size: 2rem; /* Increased arrow size */
+                z-index: -1; /* Ensure line is behind content */
+            }
+            .workflow-step:last-child::after {
+                content: none; /* No line after the last step */
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-inter text-gray-800" ng-app="opternApp" ng-controller="LandingPageController">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md py-4 px-6 md:px-12 sticky top-0 z-50 rounded-b-lg" ng-class="{'header-hidden': !isHeaderVisible, 'header-visible': isHeaderVisible}">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Optern Logo as text -->
+                <div class="text-2xl font-bold text-navy-800">Optern EduWorks</div>
+            </div>
+            <nav class="hidden md:flex space-x-6 items-center">
+                <a href="#students" class="text-gray-600 hover:text-sky-600 font-medium transition duration-300 ease-in-out">For Students</a>
+                <a href="#recruiters" class="text-gray-600 hover:text-sky-600 font-medium transition duration-300 ease-in-out">For Recruiters</a>
+                <a href="#why-optern" class="text-gray-600 hover:text-sky-600 font-medium transition duration-300 ease-in-out">Why Optern?</a>
+                <a href="#how-it-works" class="text-gray-600 hover:text-sky-600 font-medium transition duration-300 ease-in-out">How It Works</a>
+                <button class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-5 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Get Started
+                </button>
+            </nav>
+            <!-- Mobile menu button (hidden for simplicity in this example, but essential for production) -->
+            <div class="md:hidden">
+                <button class="text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-navy-800 text-white py-20 md:py-32 overflow-hidden rounded-b-xl">
+        <div class="absolute inset-0 opacity-10">
+            <!-- Abstract background pattern for visual appeal -->
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <pattern id="pattern-circles" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.1)"/>
+                </pattern>
+                <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"/>
+            </svg>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10 text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-up fade-in-on-scroll">
+                Discover. Apply. Thrive.
+            </h1>
+            <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto animate-fade-in-up delay-400 fade-in-on-scroll">
+                Optern EduWorks connects ambitious students with startups, NGOs, and organizations offering meaningful work experiences across India.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in-up delay-600 fade-in-on-scroll">
+                <button class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-8 rounded-full shadow-xl transition duration-300 ease-in-out transform hover:scale-105">
+                    Explore Opportunities
+                </button>
+                <button class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-full shadow-xl transition duration-300 ease-in-out transform hover:scale-105">
+                    Join as a Recruiter
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Students Section -->
+    <section id="students" class="py-16 md:py-24 bg-white rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-navy-800 mb-12 fade-in-on-scroll">👩‍🎓 For Students</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="flex items-start p-6 bg-blue-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <p class="text-gray-700">Explore curated internships and real-time projects across diverse fields.</p>
+            </div>
+            <div class="flex items-start p-6 bg-blue-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                <p class="text-gray-700">Build industry-ready resumes with our intuitive Resume Builder.</p>
+            </div>
+            <div class="flex items-start p-6 bg-blue-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <p class="text-gray-700">Track your applications seamlessly with our smart Application Tracker.</p>
+            </div>
+            <div class="flex items-start p-6 bg-blue-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M12 5c-3.3 0-6 2.7-6 6 0 2.2 1.5 4.1 3.5 4.7l.6 1.9c.2.6.9 1 1.5 1h.8c.6 0 1.3-.4 1.5-1l.6-1.9c2-1.6 3.5-3.5 3.5-4.7 0-3.3-2.7-6-6-6z"/><path d="M12 5v-.5a2.5 2.5 0 0 1 5 0V5"/><path d="M12 5v-.5a2.5 2.5 0 0 0-5 0V5"/><path d="M12 19v.5a2.5 2.5 0 0 0 5 0V19"/><path d="M12 19v.5a2.5 2.5 0 0 1-5 0V19"/><path d="M12 11v1"/><path d="M12 13v1"/><path d="M12 15v1"/><path d="M12 17v1"/><path d="M12 9v1"/></svg>
+                <p class="text-gray-700">Skill-based project recommendations to match your interests and growth path.</p>
+            </div>
+            <div class="flex items-start p-6 bg-blue-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-1000">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+                <p class="text-gray-700">Raise concerns via our dedicated Student Grievance Portal.</p>
+            </div>
+        </div>
+        <div class="text-center mt-12 fade-in-on-scroll delay-1000">
+            <h3 class="text-2xl font-semibold text-navy-800 mb-6 fade-in-on-scroll">Get started in 3 steps:</h3>
+            <div class="flex flex-col md:flex-row justify-center items-center md:items-stretch gap-12 max-w-4xl mx-auto workflow-container">
+                <div class="bg-yellow-100 p-4 rounded-lg shadow-md flex flex-col items-center transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-1200 workflow-step">
+                    <div class="w-10 h-10 flex items-center justify-center bg-yellow-600 text-white text-xl font-bold rounded-full mb-3 shadow-lg">1</div>
+                    <h4 class="text-lg font-semibold text-navy-800 mb-1">Sign Up</h4>
+                    <p class="text-gray-700 text-center text-sm">Create your free student account.</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg shadow-md flex flex-col items-center transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-1400 workflow-step">
+                    <div class="w-10 h-10 flex items-center justify-center bg-yellow-600 text-white text-xl font-bold rounded-full mb-3 shadow-lg">2</div>
+                    <h4 class="text-lg font-semibold text-navy-800 mb-1">Complete Profile</h4>
+                    <p class="text-gray-700 text-center text-sm">Showcase skills, education, interests.</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg shadow-md flex flex-col items-center transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-1600 workflow-step">
+                    <div class="w-10 h-10 flex items-center justify-center bg-yellow-600 text-white text-xl font-bold rounded-full mb-3 shadow-lg">3</div>
+                    <h4 class="text-lg font-semibold text-navy-800 mb-1">Start Applying!</h4>
+                    <p class="text-gray-700 text-center text-sm">Discover exciting opportunities.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Recruiters / Organizations Section -->
+    <section id="recruiters" class="py-16 md:py-24 bg-gray-50 rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-navy-800 mb-12 fade-in-on-scroll">🧑‍💼 For Recruiters / Organizations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="flex items-start p-6 bg-yellow-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 mr-4 flex-shrink-0 mt-1"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 22v-4"/></svg>
+                <p class="text-gray-700">Post Internships and Projects and receive targeted applications.</p>
+            </div>
+            <div class="flex items-start p-6 bg-yellow-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 mr-4 flex-shrink-0 mt-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <p class="text-gray-700">Filter and manage candidates with an intelligent applicant dashboard.</p>
+            </div>
+            <div class="flex items-start p-6 bg-yellow-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 mr-4 flex-shrink-0 mt-1"><path d="M12 5c-3.3 0-6 2.7-6 6 0 2.2 1.5 4.1 3.5 4.7l.6 1.9c.2.6.9 1 1.5 1h.8c.6 0 1.3-.4 1.5-1l.6-1.9c2-1.6 3.5-3.5 3.5-4.7 0-3.3-2.7-6-6-6z"/><path d="M12 5v-.5a2.5 2.5 0 0 1 5 0V5"/><path d="M12 5v-.5a2.5 2.5 0 0 0-5 0V5"/><path d="M12 19v.5a2.5 2.5 0 0 0 5 0V19"/><path d="M12 19v.5a2.5 2.5 0 0 1-5 0V19"/><path d="M12 11v1"/><path d="M12 13v1"/><path d="M12 15v1"/><path d="M12 17v1"/><path d="M12 9v1"/></svg>
+                <p class="text-gray-700">Access AI-matched profiles based on skills, interests, and availability.</p>
+            </div>
+            <div class="flex items-start p-6 bg-yellow-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 mr-4 flex-shrink-0 mt-1"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"/><path d="M16 12H8"/><path d="M12 8v8"/></svg>
+                <p class="text-gray-700">Manage posted jobs and applicants effortlessly.</p>
+            </div>
+            <div class="flex items-start p-6 bg-yellow-50 rounded-xl shadow-md transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-1000">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 mr-4 flex-shrink-0 mt-1"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                <p class="text-gray-700">Collaborate with Optern to onboard future talent.</p>
+            </div>
+        </div>
+        <div class="text-center mt-12 fade-in-on-scroll delay-1000">
+            <p class="text-lg font-semibold text-gray-700">It’s free, fast, and built for modern hiring.</p>
+        </div>
+    </section>
+
+    <!-- Why Optern? Section -->
+    <section id="why-optern" class="py-16 md:py-24 bg-white rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-navy-800 mb-12 fade-in-on-scroll">📊 Why Optern?</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="flex items-start bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/></svg>
+                <div>
+                    <h3 class="text-xl font-semibold text-navy-800 mb-2">Designed for all experience levels</h3>
+                    <p class="text-gray-700">
+                        Specifically crafted for students with little to no prior experience, offering a welcoming entry point.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-start bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M4 14.899A7 7 0 0 1 15 7h1a6 6 0 0 1 0 12H9.5"/></svg>
+                <div>
+                    <h3 class="text-xl font-semibold text-navy-800 mb-2">Scalable & Secure Tech</h3>
+                    <p class="text-gray-700">
+                        Built on a robust, scalable, and secure tech stack to ensure reliable performance.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-start bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                <div>
+                    <h3 class="text-xl font-semibold text-navy-800 mb-2">Trusted by Organizations</h3>
+                    <p class="text-gray-700">
+                        Startups and NGOs trust Optern to discover passionate, capable talent ready to contribute.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-start bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div>
+                    <h3 class="text-xl font-semibold text-navy-800 mb-2">Focused on Career Growth</h3>
+                    <p class="text-gray-700">
+                        Prioritizing practical exposure and meaningful experiences to foster long-term career development.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-start bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-sky-500 mr-4 flex-shrink-0"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <div>
+                    <h3 class="text-xl font-semibold text-navy-800 mb-2">Simple, Clean Dashboards</h3>
+                    <p class="text-gray-700">
+                        Intuitive and user-friendly interfaces for all users – no complexity, just results.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-16 md:py-24 bg-gray-50 rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 text-center fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-navy-800 mb-8 fade-in-on-scroll">🧠 How It Works (Preview)</h2>
+        <p class="text-lg text-gray-700 mb-8 fade-in-on-scroll delay-200">Want to know how we work behind the scenes?</p>
+        <a href="#" class="inline-flex items-center bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 fade-in-on-scroll delay-400">
+            Click here to view our process
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+    </section>
+
+    <!-- Trusted By Section -->
+    <section class="py-16 md:py-24 bg-white rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 text-center fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-navy-800 mb-12 fade-in-on-scroll">👥 Trusted By</h2>
+        <p class="text-gray-600 text-lg fade-in-on-scroll delay-200">
+            Logos of trusted NGOs, startups, and organizations partnered (placeholder section – to be updated as partners come in).
+        </p>
+        <div class="flex flex-wrap justify-center items-center gap-8 mt-8 fade-in-on-scroll delay-400">
+            <!-- Placeholder Logos -->
+            <img src="https://placehold.co/120x60/e0e7ff/4338ca?text=NGO+A" alt="NGO A Logo" class="h-16 object-contain grayscale hover:grayscale-0 transition duration-300">
+            <img src="https://placehold.co/120x60/ffe4e6/dc2626?text=Startup+X" alt="Startup X Logo" class="h-16 object-contain grayscale hover:grayscale-0 transition duration-300">
+            <img src="https://placehold.co/120x60/dcfce7/16a34a?text=Org+B" alt="Organization B Logo" class="h-16 object-contain grayscale hover:grayscale-0 transition duration-300">
+            <img src="https://placehold.co/120x60/fff7ed/f97316?text=Social+Ent+C" alt="Social Enterprise C Logo" class="h-16 object-contain grayscale hover:grayscale-0 transition duration-300">
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 md:py-24 bg-gray-50 rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-navy-800 mb-12 fade-in-on-scroll">📣 Testimonials</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-sky-500 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-200">
+                <p class="text-lg text-gray-700 italic mb-4">“Optern gave me the right internship at the right time.”</p>
+                <p class="text-right font-semibold text-navy-800">– Student User</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-md border-l-4 border-yellow-600 transform hover:scale-105 transition duration-300 ease-in-out fade-in-on-scroll delay-400">
+                <p class="text-lg text-gray-700 italic mb-4">“The dashboard made screening applicants a breeze!”</p>
+                <p class="text-right font-semibold text-navy-800">– Recruiter</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stay Updated (Newsletter Signup) Section -->
+    <section class="py-16 md:py-24 bg-navy-800 text-white text-center rounded-lg shadow-lg mx-auto max-w-7xl mt-8 px-6 md:px-12 fade-in-on-scroll">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6 fade-in-on-scroll">📬 Stay Updated</h2>
+        <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto fade-in-on-scroll delay-200">
+            Enter your email to get early access to new features, job listings, and platform updates.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 fade-in-on-scroll delay-400">
+            <input type="email" placeholder="📧 Your email address" class="w-full sm:w-80 p-3 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-md">
+            <button class="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-3 px-8 rounded-full shadow-xl transition duration-300 ease-in-out transform hover:scale-105">
+                Subscribe
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-10 mt-8 rounded-t-lg fade-in-on-scroll">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 text-center md:text-left">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">Optern EduWorks</h3>
+                    <p class="text-sm leading-relaxed">
+                        Your launchpad to learn, apply, and thrive in the real world. Empowering students and connecting organizations.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#students" class="hover:text-sky-500 transition duration-300">For Students</a></li>
+                        <li><a href="#recruiters" class="hover:text-sky-500 transition duration-300">For Recruiters</a></li>
+                        <li><a href="#why-optern" class="hover:text-sky-500 transition duration-300">Why Optern?</a></li>
+                        <li><a href="#how-it-works" class="hover:text-sky-500 transition duration-300">How It Works</a></li>
+                        <li><a href="#" class="hover:text-sky-500 transition duration-300">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-sky-500 transition duration-300">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">Contact</h3>
+                    <p class="text-sm">
+                        Email: <a href="mailto:admin@optern-eduworks.com" class="hover:text-sky-500 transition duration-300">admin@optern-eduworks.com</a>
+                    </p>
+                    <p class="text-sm mt-2">
+                        Follow us on social media for updates and opportunities.
+                    </p>
+                    <!-- Social media icons placeholder -->
+                    <div class="flex justify-center md:justify-start space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-sky-500 transition duration-300">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.707 8.293a1 1 0 00-1.414-1.414L12 10.586l-2.293-2.293a1 1 0 00-1.414 1.414L10.586 12l-2.293 2.293a1 1 0 001.414 1.414L12 13.414l2.293 2.293a1 1 0 001.414-1.414L13.414 12l2.293-2.293z"/></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-sky-500 transition duration-300">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.32 7.318c.08-.27.12-.55.12-.83 0-2.31-1.87-4.18-4.18-4.18-1.12 0-2.14.44-2.89 1.15-.75-.71-1.77-1.15-2.89-1.15-2.31 0-4.18 1.87-4.18 4.18 0 .28.04.56.12.83C4.19 12.18 2 14.88 2 18h20c0-3.12-2.19-5.82-5.68-8.682z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 pt-8 text-sm text-center">
+                &copy; {{ currentYear }} Optern EduWorks. All rights reserved. | Designed & Developed by Optern Team.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
